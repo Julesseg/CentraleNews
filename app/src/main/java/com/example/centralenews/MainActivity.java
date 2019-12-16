@@ -116,6 +116,18 @@ public class MainActivity extends AppCompatActivity {
 
         ListView lv = findViewById(R.id.mylistview);
         lv.setAdapter(sa);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    Intent articleIntent = new Intent(MainActivity.this, ArticleDetailActivity.class);
+                    articleIntent.putExtra("articleData", articles.getJSONObject(position).toString());
+                    startActivity(articleIntent);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }
 

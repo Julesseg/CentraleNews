@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
 
     private String apiKey = "9e1afcb1d2b34e46aeccaaa433b89cbd";
     private String language = Locale.getDefault().getLanguage();
-    public static TextView text;
     public static JSONArray sources = null;
     public List<String> sourceIds = new ArrayList<String>();
     public static JSONArray articles = null;
@@ -41,10 +42,44 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        buildArticleList("google-news-fr");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        for (int i = 0; i < sources.length(); i++) {
+            String title = null;
+            String id;
+            try {
+                JSONObject source = sources.getJSONObject(i);
+                title = source.getString("name");
+                id = source.getString("id");
+                sourceIds.add(id);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            menu.add(0, i, 0, title);
+        }
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.source_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int selectedId = item.getItemId();
+        String selectedSource = sourceIds.get(selectedId);
+
+        buildArticleList(selectedSource);
+        return true;
+    }
+
+    public void buildArticleList(String source) {
+
         fetchArticles process = new fetchArticles();
         String articlesString = null;
         try {
-            articlesString = process.execute(apiKey, language, "google-news-fr").get();
+            articlesString = process.execute(apiKey, language, source).get();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -82,30 +117,5 @@ public class MainActivity extends AppCompatActivity {
         ListView lv = findViewById(R.id.mylistview);
         lv.setAdapter(sa);
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        for (int i = 0; i < sources.length(); i++) {
-            String title = null;
-            String id;
-            try {
-                JSONObject source = sources.getJSONObject(i);
-                title = source.getString("name");
-                id = source.getString("id");
-                sourceIds.add(id);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            menu.add(0, i, 0, title);
-        }
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.source_menu, menu);
-        return true;
-    }
-
-    /*@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int selectedId = item.getItemId();
-
-    }*/
 }
+
